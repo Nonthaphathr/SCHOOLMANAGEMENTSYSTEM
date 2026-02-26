@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
 :root {
@@ -955,6 +956,193 @@ header {
   justify-content:center;
   border:2px solid var(--bg);
 }
+
+/* ─── QR Modal ─── */
+.qr-modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1);
+  position: relative;
+  overflow: hidden;
+}
+@media (min-width:640px) { .qr-modal-box { border-radius:24px; } }
+
+.qr-modal-box::before {
+  content:'';
+  position:absolute;
+  top:-60px; right:-60px;
+  width:180px; height:180px;
+  background: radial-gradient(circle, rgba(249,115,22,0.15) 0%, transparent 70%);
+  pointer-events:none;
+}
+
+.qr-canvas-wrap {
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin: 1.5rem 0;
+}
+
+.qr-canvas-frame {
+  position:relative;
+  padding: 16px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 0 40px rgba(249,115,22,0.25), 0 0 0 1px rgba(249,115,22,0.3);
+}
+
+.qr-canvas-frame canvas {
+  display: block;
+  border-radius: 8px;
+}
+
+/* Corner decorations */
+.qr-corner {
+  position:absolute;
+  width:20px; height:20px;
+  border-color: var(--orange);
+  border-style: solid;
+}
+.qr-corner-tl { top:-2px; left:-2px; border-width:3px 0 0 3px; border-radius:6px 0 0 0; }
+.qr-corner-tr { top:-2px; right:-2px; border-width:3px 3px 0 0; border-radius:0 6px 0 0; }
+.qr-corner-bl { bottom:-2px; left:-2px; border-width:0 0 3px 3px; border-radius:0 0 0 6px; }
+.qr-corner-br { bottom:-2px; right:-2px; border-width:0 3px 3px 0; border-radius:0 0 6px 0; }
+
+.qr-title-chip {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.4rem;
+  background:rgba(249,115,22,0.1);
+  border:1px solid var(--border);
+  border-radius:99px;
+  padding:0.35rem 1rem;
+  font-size:0.75rem;
+  color:var(--orange);
+  font-weight:700;
+  letter-spacing:0.05em;
+  margin-bottom:0.5rem;
+}
+
+.qr-system-name {
+  font-size:1rem;
+  font-weight:700;
+  text-align:center;
+  color:var(--text);
+  margin-bottom:0.25rem;
+  padding:0 1rem;
+  line-height:1.4;
+}
+
+.qr-url-text {
+  font-size:0.72rem;
+  color:var(--text2);
+  text-align:center;
+  word-break:break-all;
+  padding:0 0.5rem;
+  line-height:1.5;
+}
+
+.qr-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.75rem;
+  margin-top:1.5rem;
+}
+
+.qr-btn {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.4rem;
+  padding:0.85rem;
+  border-radius:14px;
+  font-family:'Kanit',sans-serif;
+  font-size:0.85rem;
+  font-weight:600;
+  cursor:pointer;
+  border:none;
+  transition:all 0.3s;
+}
+
+.qr-btn-primary {
+  background:linear-gradient(135deg,var(--orange),var(--gold));
+  color:#000;
+  box-shadow:0 4px 15px rgba(249,115,22,0.35);
+}
+.qr-btn-primary:hover { box-shadow:0 6px 20px rgba(249,115,22,0.5); transform:translateY(-1px); }
+
+.qr-btn-ghost {
+  background:rgba(255,255,255,0.06);
+  color:var(--text);
+  border:1px solid var(--border2);
+}
+.qr-btn-ghost:hover { background:rgba(249,115,22,0.12); color:var(--orange); border-color:var(--border); }
+
+/* ─── Copy toast ─── */
+@keyframes copyPop {
+  0% { transform:scale(0.8) translateY(10px); opacity:0; }
+  60% { transform:scale(1.05) translateY(-2px); opacity:1; }
+  100% { transform:scale(1) translateY(0); opacity:1; }
+}
+
+.copy-toast {
+  position:fixed;
+  bottom:2rem;
+  left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--orange),var(--gold));
+  color:#000;
+  font-weight:700;
+  font-size:0.85rem;
+  padding:0.75rem 1.5rem;
+  border-radius:99px;
+  box-shadow:0 8px 30px rgba(249,115,22,0.4);
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+  animation:copyPop 0.4s ease;
+  pointer-events:none;
+  white-space:nowrap;
+}
+
+/* ─── Detail action buttons ─── */
+.detail-action-row {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.6rem;
+  margin-bottom:0.75rem;
+}
+
+.detail-action-btn {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.4rem;
+  padding:0.75rem;
+  border-radius:12px;
+  font-family:'Kanit',sans-serif;
+  font-size:0.8rem;
+  font-weight:600;
+  cursor:pointer;
+  border:1px solid var(--border2);
+  background:rgba(255,255,255,0.04);
+  color:var(--text2);
+  transition:all 0.3s;
+}
+.detail-action-btn:hover {
+  background:rgba(249,115,22,0.1);
+  color:var(--orange);
+  border-color:var(--border);
+  transform:translateY(-1px);
+}
+.detail-action-btn:active { transform:translateY(0); }
 </style>
 </head>
 <body>
@@ -1121,12 +1309,76 @@ header {
       <div class="detail-cat" id="detailCat"></div>
       <div class="detail-meta" id="detailMeta"></div>
       <div class="detail-desc" id="detailDesc"></div>
+      <!-- Action row: Copy + QR -->
+      <div class="detail-action-row">
+        <button class="detail-action-btn" onclick="handleCopyFromDetail()">
+          <i class="fa-regular fa-copy"></i> คัดลอกลิงก์
+        </button>
+        <button class="detail-action-btn" onclick="handleQRFromDetail()">
+          <i class="fa-solid fa-qrcode"></i> QR Code
+        </button>
+      </div>
       <a class="detail-link" id="detailLink" href="#" target="_blank">
         <i class="fa-solid fa-arrow-up-right-from-square"></i>
         เข้าใช้งานระบบ
       </a>
     </div>
   </div>
+</div>
+
+<!-- ═══════════════════ QR MODAL ═══════════════════ -->
+<div class="modal-backdrop" id="qrModal" style="display:none" onclick="closeQR()">
+  <div class="qr-modal-box" onclick="event.stopPropagation()">
+    <!-- Header -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.5rem;">
+      <div class="qr-title-chip">
+        <i class="fa-solid fa-qrcode"></i> QR CODE
+      </div>
+      <button onclick="closeQR()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:var(--text2);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;transition:all 0.2s;flex-shrink:0;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="qr-system-name" id="qrSystemName">ชื่อระบบ</div>
+    <div class="qr-url-text" id="qrUrlText">https://...</div>
+
+    <!-- QR Canvas -->
+    <div class="qr-canvas-wrap">
+      <div class="qr-canvas-frame">
+        <canvas id="qrCanvas" width="200" height="200"></canvas>
+        <div class="qr-corner qr-corner-tl"></div>
+        <div class="qr-corner qr-corner-tr"></div>
+        <div class="qr-corner qr-corner-bl"></div>
+        <div class="qr-corner qr-corner-br"></div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="qr-actions">
+      <button class="qr-btn qr-btn-primary" onclick="downloadQR()">
+        <i class="fa-solid fa-download"></i> บันทึก QR
+      </button>
+      <button class="qr-btn qr-btn-ghost" id="qrCopyBtn" onclick="copyFromQRModal()">
+        <i class="fa-regular fa-copy"></i> คัดลอกลิงก์
+      </button>
+    </div>
+
+    <!-- Template text box -->
+    <div style="margin-top:1rem;background:rgba(249,115,22,0.06);border:1px solid var(--border);border-radius:12px;padding:1rem;position:relative;">
+      <div style="font-size:0.7rem;color:var(--orange);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.4rem;">
+        <i class="fa-solid fa-message"></i> เทมเพลตข้อความ
+      </div>
+      <div id="qrTemplateText" style="font-size:0.82rem;color:var(--text2);line-height:1.7;white-space:pre-wrap;word-break:break-word;"></div>
+      <button onclick="copyTemplate()" style="margin-top:0.75rem;width:100%;padding:0.6rem;border-radius:10px;background:rgba(249,115,22,0.15);border:1px solid var(--border);color:var(--orange);font-family:'Kanit',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;transition:all 0.3s;">
+        <i class="fa-regular fa-clipboard"></i> คัดลอกเทมเพลต
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Copy Toast -->
+<div class="copy-toast" id="copyToast" style="display:none;">
+  <i class="fa-solid fa-check"></i>
+  <span id="copyToastMsg">คัดลอกแล้ว!</span>
 </div>
 
 <script>
@@ -1148,6 +1400,8 @@ let allData = [];
 let currentCat = "ทั้งหมด";
 let searchQ = "";
 let isEditMode = false;
+let qrCurrentData = null;   // { title, link } for active QR modal
+let detailCurrentId = null; // id of currently open detail
 
 // ─── SweetAlert helpers ───────────────────────────────────
 const Toast = Swal.mixin({
@@ -1298,6 +1552,12 @@ function renderCards() {
             <i class="fa-solid fa-arrow-up-right-from-square"></i> เข้าใช้งาน
           </a>
           <div class="card-actions">
+            <button class="icon-btn" title="คัดลอกลิงก์" onclick="event.stopPropagation();handleCopy('${d.id}')">
+              <i class="fa-regular fa-copy"></i>
+            </button>
+            <button class="icon-btn" title="QR Code" onclick="event.stopPropagation();handleQR('${d.id}')">
+              <i class="fa-solid fa-qrcode"></i>
+            </button>
             <button class="icon-btn" title="แก้ไข" onclick="event.stopPropagation();handleEdit('${d.id}')">
               <i class="fa-solid fa-pen"></i>
             </button>
@@ -1318,7 +1578,7 @@ function openDetail(id) {
   const catClass = CAT_STYLES[d.category] || 'cat-other';
   const date = d.timestamp ? new Date(d.timestamp).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'}) : '';
 
-  document.getElementById('detailCat').className = `detail-cat ${catClass}`;
+  detailCurrentId = id;
   document.getElementById('detailCat').innerHTML = `<i class="fa-solid fa-tag"></i> ${escHtml(d.category||'อื่นๆ')}`;
   document.getElementById('detailMeta').innerHTML = date ? `<i class="fa-regular fa-calendar"></i> ${date}` : '';
   document.getElementById('detailDesc').textContent = d.description || '-';
@@ -1408,7 +1668,198 @@ function drawCoverCanvas(titleText) {
   img.src = COVER_IMG;
 }
 
-function closeDetail() {
+// ─── Copy Toast ───────────────────────────────────────────
+let copyToastTimer = null;
+function showCopyToast(msg='คัดลอกแล้ว!') {
+  const el = document.getElementById('copyToast');
+  document.getElementById('copyToastMsg').textContent = msg;
+  el.style.display='flex';
+  el.style.animation='none';
+  requestAnimationFrame(()=>{ el.style.animation='copyPop 0.4s ease'; });
+  clearTimeout(copyToastTimer);
+  copyToastTimer = setTimeout(()=>{ el.style.display='none'; }, 2500);
+}
+
+// ─── Copy Link ────────────────────────────────────────────
+function handleCopy(id) {
+  const d = allData.find(x=>x.id===id);
+  if(!d) return;
+  const text = buildCopyTemplate(d.title, d.link);
+  navigator.clipboard.writeText(text).then(()=>{
+    showCopyToast('คัดลอกข้อความแล้ว!');
+  }).catch(()=>{ showCopyToast('คัดลอกแล้ว!'); });
+}
+
+function handleCopyFromDetail() {
+  const d = allData.find(x=>x.id===detailCurrentId);
+  if(!d) return;
+  const text = buildCopyTemplate(d.title, d.link);
+  navigator.clipboard.writeText(text).then(()=>{ showCopyToast('คัดลอกข้อความแล้ว!'); });
+}
+
+function buildCopyTemplate(title, link) {
+  return `📌 ${title}\n🔗 ${link}\n\n— ระบบรวบรวมระบบจัดการงานโรงเรียนแบบออนไลน์`;
+}
+
+// ─── QR Code ─────────────────────────────────────────────
+let qrInstance = null;
+
+function handleQR(id) {
+  const d = allData.find(x=>x.id===id);
+  if(!d) return;
+  openQRModal(d);
+}
+
+function handleQRFromDetail() {
+  const d = allData.find(x=>x.id===detailCurrentId);
+  if(!d) return;
+  openQRModal(d);
+}
+
+function openQRModal(d) {
+  qrCurrentData = { title: d.title || '-', link: d.link || '' };
+
+  document.getElementById('qrSystemName').textContent = d.title || '-';
+  document.getElementById('qrUrlText').textContent = d.link || '-';
+  document.getElementById('qrTemplateText').textContent = buildCopyTemplate(d.title, d.link);
+
+  // Clear & draw QR
+  const container = document.getElementById('qrCanvas');
+  container.getContext('2d').clearRect(0, 0, 200, 200);
+
+  // Use API-based QR render onto canvas
+  drawQRtoCanvas(d.link || 'https://example.com');
+
+  document.getElementById('qrModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function drawQRtoCanvas(url) {
+  const canvas = document.getElementById('qrCanvas');
+  const ctx = canvas.getContext('2d');
+  const size = 200;
+  canvas.width = size;
+  canvas.height = size;
+
+  // Use qrcode.js to generate QR into a temp div then extract image
+  const tmpDiv = document.createElement('div');
+  tmpDiv.style.display = 'none';
+  document.body.appendChild(tmpDiv);
+
+  try {
+    new QRCode(tmpDiv, {
+      text: url,
+      width: size,
+      height: size,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    // QRCode.js creates either canvas or img
+    setTimeout(() => {
+      const qrCanvas = tmpDiv.querySelector('canvas');
+      const qrImg = tmpDiv.querySelector('img');
+
+      if (qrCanvas) {
+        // Draw onto our canvas
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, size, size);
+        ctx.drawImage(qrCanvas, 0, 0, size, size);
+      } else if (qrImg) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, size, size);
+          ctx.drawImage(img, 0, 0, size, size);
+        };
+        img.src = qrImg.src;
+      }
+      document.body.removeChild(tmpDiv);
+    }, 80);
+  } catch(e) {
+    document.body.removeChild(tmpDiv);
+    // Fallback: use QR API image
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, 0, 0, size, size);
+    };
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&format=png`;
+  }
+}
+
+function closeQR() {
+  document.getElementById('qrModal').style.display = 'none';
+  document.body.style.overflow = '';
+  qrCurrentData = null;
+}
+
+function downloadQR() {
+  const canvas = document.getElementById('qrCanvas');
+  const name = (qrCurrentData?.title || 'qr').replace(/[^a-zA-Zก-๙0-9]/g,'_').slice(0,40);
+
+  // Create larger download canvas with branding
+  const dlCanvas = document.createElement('canvas');
+  const pad = 32;
+  const qrSize = 240;
+  const footerH = 72;
+  dlCanvas.width  = qrSize + pad * 2;
+  dlCanvas.height = qrSize + pad * 2 + footerH;
+  const ctx = dlCanvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#111111';
+  ctx.fillRect(0, 0, dlCanvas.width, dlCanvas.height);
+
+  // Orange border glow
+  ctx.strokeStyle = 'rgba(249,115,22,0.6)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, dlCanvas.width-2, dlCanvas.height-2);
+
+  // White QR area
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.roundRect(pad-8, pad-8, qrSize+16, qrSize+16, 12);
+  ctx.fill();
+
+  // Draw QR
+  ctx.drawImage(canvas, pad, pad, qrSize, qrSize);
+
+  // Footer text
+  ctx.fillStyle = '#f97316';
+  ctx.font = 'bold 13px Kanit, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('📌 ' + (qrCurrentData?.title || ''), dlCanvas.width/2, qrSize + pad*2 + 20);
+  ctx.fillStyle = '#a3a3a3';
+  ctx.font = '11px Kanit, sans-serif';
+  ctx.fillText('สแกนเพื่อเข้าใช้งานระบบ', dlCanvas.width/2, qrSize + pad*2 + 40);
+
+  const a = document.createElement('a');
+  a.download = `QR_${name}.png`;
+  a.href = dlCanvas.toDataURL('image/png');
+  a.click();
+  showCopyToast('บันทึก QR Code แล้ว!');
+}
+
+function copyFromQRModal() {
+  if(!qrCurrentData) return;
+  navigator.clipboard.writeText(qrCurrentData.link).then(()=>{
+    showCopyToast('คัดลอกลิงก์แล้ว!');
+  });
+}
+
+function copyTemplate() {
+  if(!qrCurrentData) return;
+  const text = buildCopyTemplate(qrCurrentData.title, qrCurrentData.link);
+  navigator.clipboard.writeText(text).then(()=>{
+    showCopyToast('คัดลอกเทมเพลตแล้ว!');
+  });
+}
+
+
   document.getElementById('detailModal').style.display='none';
   document.body.style.overflow='';
 }
@@ -1537,7 +1988,7 @@ window.addEventListener('load', ()=>{
 
 // Keyboard shortcut
 document.addEventListener('keydown', e=>{
-  if(e.key==='Escape') { closeModal(); closeDetail(); }
+  if(e.key==='Escape') { closeModal(); closeDetail(); closeQR(); }
 });
 </script>
 </body>
