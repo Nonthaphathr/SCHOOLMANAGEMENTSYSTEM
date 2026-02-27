@@ -1859,9 +1859,10 @@ function copyTemplate() {
   });
 }
 
-
+function closeDetail() {
   document.getElementById('detailModal').style.display='none';
   document.body.style.overflow='';
+  detailCurrentId = null;
 }
 
 // ─── Form Modal ───────────────────────────────────────────
